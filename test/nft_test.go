@@ -2,6 +2,8 @@ package test
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"testing"
@@ -16,6 +18,21 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func getKeys() ([]string, error) {
+	var sks []string
+	content, err := ioutil.ReadFile("../keys.json")
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(content, &sks)
+	if err != nil {
+		return nil, err
+	}
+
+	return sks, nil
+}
+
 func TestNFT(t *testing.T) {
 	client, err := ethclient.Dial("https://devchain.metamemo.one:8501")
 	if err != nil {
@@ -28,7 +45,12 @@ func TestNFT(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sk, err := crypto.HexToECDSA("0a95533a110ee10bdaa902fed92e56f3f7709a532e22b5974c03c0251648a5d4")
+	sks, err := getKeys()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sk, err := crypto.HexToECDSA(sks[0])
 	if err != nil {
 		t.Fatal(err)
 	}
